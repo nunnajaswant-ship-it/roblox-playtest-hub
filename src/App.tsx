@@ -14,6 +14,8 @@ import { PipelineView } from './views/PipelineView';
 import { ReadinessView } from './views/ReadinessView';
 import { DataView } from './views/DataView';
 
+import { PipelineRunView } from './views/PipelineRunView';
+
 function isTyping(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   return (
@@ -50,6 +52,16 @@ function Workspace() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [dispatch, formOpen]);
+
+  if (view === 'run') {
+    return (
+      <>
+        <PipelineRunView />
+        <ReportForm />
+        <Toast />
+      </>
+    );
+  }
 
   return (
     <div className="app">

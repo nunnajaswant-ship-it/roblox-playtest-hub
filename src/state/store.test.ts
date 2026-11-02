@@ -10,6 +10,7 @@ function initial(): AppState {
     filters: { ...EMPTY_FILTERS },
     view: 'overview',
     selectedId: null,
+    runId: null,
     formOpen: false,
     toast: null,
     toastSeq: 1,
@@ -47,6 +48,8 @@ describe('reducer', () => {
     expect(state.db.reports[0].history).toHaveLength(1);
     expect(state.formOpen).toBe(false);
     expect(state.selectedId).toBe(state.db.reports[0].id);
+    expect(state.view).toBe('run');
+    expect(state.runId).toBe(state.db.reports[0].id);
   });
 
   it('records a status change in history', () => {

@@ -24,7 +24,15 @@ export type Frequency = 'always' | 'often' | 'sometimes' | 'once';
 
 export type HistoryKind = 'created' | 'status' | 'assignee' | 'comment' | 'duplicate';
 
-export type ViewId = 'overview' | 'playtest' | 'triage' | 'reports' | 'pipeline' | 'readiness' | 'data';
+export type ViewId =
+  | 'run'
+  | 'overview'
+  | 'playtest'
+  | 'triage'
+  | 'reports'
+  | 'pipeline'
+  | 'readiness'
+  | 'data';
 
 export interface Build {
   id: string;
@@ -84,6 +92,8 @@ export interface Database {
   activeBuildId: string;
   settings: {
     lastLoadError: string | null;
+    /** False until the user has been through the game + pipeline walkthrough. */
+    onboarded: boolean;
   };
 }
 

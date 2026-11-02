@@ -9,36 +9,56 @@ interface Props {
 const W = 960;
 const H = 540;
 
-interface Core {
+/** Fixed coin lanes so a demo run is repeatable and the defect is easy to trigger. */
+const COIN_SPOTS: [number, number][] = [
+  [200, 270],
+  [320, 270],
+  [440, 270],
+  [560, 270],
+  [680, 270],
+  [800, 270]
+];
+
+const VILLAIN_START: [number, number][] = [
+  [180, 20],
+  [380, 90],
+  [580, 160],
+  [780, 230]
+];
+
+interface Coin {
   x: number;
   y: number;
 }
 
-interface Hazard {
+interface Villain {
   x: number;
   y: number;
   vy: number;
 }
 
 /**
- * The test build. Two variants of the same scene:
- *   0.5.0 has three planted defects, deliberately.
- *   0.5.1 is the same scene after the agent team patched them.
- * Bugs in 0.5.0: score doubles, hazard collision skips frames, restart keeps score.
+ * The test build. Two variants of the same scene.
+ *
+ * 0.5.0 has exactly two planted defects, both requested for the demo:
+ *   1. The score only goes up once for every TWO coins collected.
+ *   2. Touching a villain does not kill the player.
+ *
+ * 0.5.1 is the same scene with both fixed: one coin is one point, and a villain
+ * ends the run.
  */
 export function TestBuild({ variant }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [running, setRunning] = useState(false);
-  const [hud, setHud] = useState({ score: 0, time: 30, hits: 0 });
+  const [hud, setHud] = useState({ coins: 0, score: 0, time: 30, dead: false, running: false });
 
   const stateRef = useRef({
     player: { x: W / 2, y: H / 2 },
-    cores: [] as Core[],
-    hazards: [] as Hazard[],
+    coins: [] as Coin[],
+    villains: [] as Villain[],
+    coinsCollected: 0,
     score: 0,
-    hits: 0,
     timeLeft: 30,
-    frame: 0,
+    dead: false,
     running: false,
     keys: new Set<string>()
   });
@@ -51,25 +71,18 @@ export function TestBuild({ variant }: Props) {
 
     const s = stateRef.current;
     s.player = { x: W / 2, y: H / 2 };
-    s.cores = Array.from({ length: 6 }, () => ({
-      x: 60 + Math.random() * (W - 120),
-      y: 60 + Math.random() * (H - 120)
+    s.coins = COIN_SPOTS.map(([x, y]) => ({ x, y }));
+    s.villains = VILLAIN_START.map(([x, y], i) => ({
+      x,
+      y,
+      vy: 110 + i * 20
     }));
-    s.hazards = Array.from({ length: 4 }, (_, i) => ({
-      x: 120 + i * 210,
-      y: 40 + Math.random() * 80,
-      vy: 90 + Math.random() * 60
-    }));
-    // 0.5.0 bug 3: restart does not reset the score.
-    if (variant === '0.5.1') {
-      s.score = 0;
-      s.hits = 0;
-    }
+    s.coinsCollected = 0;
+    s.score = 0;
     s.timeLeft = 30;
-    s.frame = 0;
+    s.dead = false;
     s.running = false;
-    setRunning(false);
-    setHud({ score: s.score, time: 30, hits: s.hits });
+    setHud({ coins: 0, score: 0, time: 30, dead: false, running: false });
 
     const onKey = (event: KeyboardEvent, down: boolean) => {
       const key = event.key.toLowerCase();
@@ -91,11 +104,10 @@ export function TestBuild({ variant }: Props) {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
 
-      if (s.running) {
-        s.frame += 1;
+      if (s.running && !s.dead) {
         s.timeLeft = Math.max(0, s.timeLeft - dt);
 
-        const speed = 260;
+        const speed = 270;
         let dx = 0;
         let dy = 0;
         if (s.keys.has('arrowleft') || s.keys.has('a')) dx -= 1;
@@ -106,36 +118,50 @@ export function TestBuild({ variant }: Props) {
         s.player.x = Math.max(14, Math.min(W - 14, s.player.x + (dx / len) * speed * dt));
         s.player.y = Math.max(14, Math.min(H - 14, s.player.y + (dy / len) * speed * dt));
 
-        for (const core of s.cores) {
-          if (Math.hypot(core.x - s.player.x, core.y - s.player.y) < 20) {
-            // 0.5.0 bug 1: score doubles per pickup.
-            s.score += variant === '0.5.0' ? 2 : 1;
-            core.x = 60 + Math.random() * (W - 120);
-            core.y = 60 + Math.random() * (H - 120);
+        for (const coin of s.coins) {
+          if (Math.hypot(coin.x - s.player.x, coin.y - s.player.y) < 20) {
+            s.coinsCollected += 1;
+
+            if (variant === '0.5.1') {
+              // Fixed: one coin is one point.
+              s.score += 1;
+            } else if (s.coinsCollected % 2 === 0) {
+              // Planted defect: only every second coin scores.
+              s.score += 1;
+            }
+
+            coin.x = -999;
+            coin.y = -999;
           }
         }
 
-        for (const hazard of s.hazards) {
-          hazard.y += hazard.vy * dt;
-          if (hazard.y > H + 20) {
-            hazard.y = -20;
-            hazard.x = 60 + Math.random() * (W - 120);
+        for (const villain of s.villains) {
+          villain.y += villain.vy * dt;
+          if (villain.y > H + 20) {
+            villain.y = -20;
+            villain.x = 70 + Math.random() * (W - 140);
           }
-          // 0.5.0 bug 2: collision is only checked on every third frame.
-          const check = variant === '0.5.1' || s.frame % 3 === 0;
-          if (check && Math.hypot(hazard.x - s.player.x, hazard.y - s.player.y) < 24) {
-            s.hits += 1;
-            hazard.y = -20;
-            hazard.x = 60 + Math.random() * (W - 120);
+          if (Math.hypot(villain.x - s.player.x, villain.y - s.player.y) < 25) {
+            if (variant === '0.5.1') {
+              // Fixed: a villain ends the run.
+              s.dead = true;
+              s.running = false;
+            }
+            // Planted defect: in 0.5.0, contact does nothing at all.
           }
         }
 
         if (s.timeLeft <= 0) {
           s.running = false;
-          setRunning(false);
         }
 
-        setHud({ score: s.score, time: Math.ceil(s.timeLeft), hits: s.hits });
+        setHud({
+          coins: s.coinsCollected,
+          score: s.score,
+          time: Math.ceil(s.timeLeft),
+          dead: s.dead,
+          running: s.running
+        });
       }
 
       ctx.fillStyle = '#080b11';
@@ -156,20 +182,38 @@ export function TestBuild({ variant }: Props) {
         ctx.stroke();
       }
 
-      for (const core of s.cores) {
+      for (const coin of s.coins) {
+        if (coin.x < 0) continue;
         ctx.fillStyle = '#ffd166';
         ctx.beginPath();
-        ctx.arc(core.x, core.y, 9, 0, Math.PI * 2);
+        ctx.arc(coin.x, coin.y, 9, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      for (const hazard of s.hazards) {
+      for (const villain of s.villains) {
         ctx.fillStyle = '#ff4d6d';
-        ctx.fillRect(hazard.x - 12, hazard.y - 12, 24, 24);
+        ctx.beginPath();
+        ctx.moveTo(villain.x, villain.y - 13);
+        ctx.lineTo(villain.x + 13, villain.y + 11);
+        ctx.lineTo(villain.x - 13, villain.y + 11);
+        ctx.closePath();
+        ctx.fill();
       }
 
-      ctx.fillStyle = '#38e8ff';
+      ctx.fillStyle = s.dead ? '#4a5a72' : '#38e8ff';
       ctx.fillRect(s.player.x - 11, s.player.y - 11, 22, 22);
+
+      if (s.dead) {
+        ctx.fillStyle = 'rgba(8, 11, 17, 0.72)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#ff4d6d';
+        ctx.font = 'bold 46px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('ELIMINATED', W / 2, H / 2);
+        ctx.fillStyle = '#93a4bd';
+        ctx.font = '16px system-ui, sans-serif';
+        ctx.fillText('A villain touched you. Press Restart.', W / 2, H / 2 + 34);
+      }
 
       raf = requestAnimationFrame(loop);
     };
@@ -183,22 +227,38 @@ export function TestBuild({ variant }: Props) {
     };
   }, [variant]);
 
-  const start = () => {
+  const restart = () => {
     const s = stateRef.current;
-    s.running = true;
+    s.player = { x: W / 2, y: H / 2 };
+    s.coins = COIN_SPOTS.map(([x, y]) => ({ x, y }));
+    s.villains = VILLAIN_START.map(([x, y], i) => ({ x, y, vy: 110 + i * 20 }));
+    s.coinsCollected = 0;
+    s.score = 0;
     s.timeLeft = 30;
-    setRunning(true);
+    s.dead = false;
+    s.running = true;
+    s.keys.clear();
+    setHud({ coins: 0, score: 0, time: 30, dead: false, running: true });
   };
 
   return (
     <div className="stack">
-      <div className="row" style={{ gap: 16, flexWrap: 'wrap' }}>
-        <span className="chip">build {variant}</span>
-        <span className="chip">score {hud.score}</span>
-        <span className="chip">time {hud.time}s</span>
-        <span className="chip">hits {hud.hits}</span>
-        <button type="button" className="btn btn-primary" onClick={start}>
-          {running ? 'Running' : hud.time === 0 ? 'Play again' : 'Start run'}
+      <div className="game-hud">
+        <span className="hud-item">
+          <span className="hud-label">Coins</span>
+          <span className="hud-value" data-testid="coins">{hud.coins}</span>
+        </span>
+        <span className="hud-item">
+          <span className="hud-label">Score</span>
+          <span className="hud-value" data-testid="score">{hud.score}</span>
+        </span>
+        <span className="hud-item">
+          <span className="hud-label">Time</span>
+          <span className="hud-value">{hud.time}s</span>
+        </span>
+        <span className="hud-item hud-spacer" />
+        <button type="button" className="btn btn-primary" onClick={restart}>
+          {hud.running ? 'Restart' : hud.dead ? 'Restart' : 'Start run'}
         </button>
       </div>
 
@@ -212,14 +272,15 @@ export function TestBuild({ variant }: Props) {
           aspectRatio: '16 / 9',
           borderRadius: 10,
           border: '1px solid var(--ink-600)',
-          background: '#080b11'
+          background: '#080b11',
+          display: 'block'
         }}
-        aria-label={`Test build ${variant}. Move with WASD or arrow keys. Collect gold cores, avoid red blocks.`}
+        aria-label={`Test build ${variant}. Move with WASD or arrow keys. Collect gold coins, avoid red villains.`}
       />
 
       <p className="hint">
-        Move with WASD or the arrow keys. Collect gold cores. Avoid the red blocks.
-        Watch the score, the hit counter, and what happens when you restart.
+        WASD or arrow keys. Gold circles are coins. Red triangles are villains - touching one
+        should end your run.
       </p>
     </div>
   );

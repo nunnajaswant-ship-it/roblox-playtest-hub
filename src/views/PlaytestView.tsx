@@ -12,9 +12,9 @@ export function PlaytestView() {
     <div className="view">
       <div className="view-head">
         <div>
-          <h1 className="view-title">Test build</h1>
+          <h1 className="view-title">Build 0.5.0 is live for testing</h1>
           <p className="view-sub">
-            Play it. Find something wrong. File it. That is the whole intake.
+            Play it. Something will feel wrong. File it, and the pipeline takes over.
           </p>
         </div>
         <div className="row">
@@ -25,7 +25,7 @@ export function PlaytestView() {
             onChange={(event) => setVariant(event.target.value as Variant)}
           >
             <option value="0.5.0">0.5.0 - under test</option>
-            <option value="0.5.1">0.5.1 - agent fixes applied</option>
+            <option value="0.5.1">0.5.1 - fixes applied</option>
           </select>
           <button
             type="button"
@@ -33,6 +33,13 @@ export function PlaytestView() {
             onClick={() => dispatch({ type: 'form/open' })}
           >
             Report a bug
+          </button>
+          <button
+            type="button"
+            className="btn"
+            onClick={() => dispatch({ type: 'run/finish' })}
+          >
+            Open workspace
           </button>
         </div>
       </div>

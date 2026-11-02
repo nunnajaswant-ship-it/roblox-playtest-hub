@@ -23,6 +23,8 @@ export interface AppState {
   filters: Filters;
   view: ViewId;
   selectedId: string | null;
+  /** When set, the pipeline walkthrough is showing this report. */
+  runId: string | null;
   formOpen: boolean;
   toast: Toast | null;
   /** Set when the browser refused to persist. The app keeps working in memory. */
@@ -41,6 +43,7 @@ export type Action =
   | { type: 'filters/clear' }
   | { type: 'build/set'; buildId: string }
   | { type: 'view/set'; view: ViewId }
+  | { type: 'run/finish' }
   | { type: 'report/select'; id: string | null }
   | { type: 'form/open' }
   | { type: 'form/close' }
@@ -104,6 +107,8 @@ export function reducer(state: AppState, action: Action): AppState {
         db: { ...state.db, reports: [report, ...state.db.reports] },
         selectedId: report.id,
         formOpen: false,
+        view: 'run',
+        runId: report.id,
         toast: { id: state.toastSeq + 1, message: `${report.ref} created`, tone: 'ok' },
         toastSeq: state.toastSeq + 1
       };
@@ -211,6 +216,18 @@ export function reducer(state: AppState, action: Action): AppState {
     case 'view/set':
       return { ...state, view: action.view };
 
+    case 'run/finish':
+      return {
+        ...state,
+        view: 'overview',
+        runId: null,
+        selectedId: null,
+        db: {
+          ...state.db,
+          settings: { ...state.db.settings, onboarded: true }
+        }
+      };
+
     case 'report/select':
       return { ...state, selectedId: action.id };
 
@@ -239,6 +256,8 @@ export function reducer(state: AppState, action: Action): AppState {
         ...state,
         db: seedDatabase(),
         selectedId: null,
+        runId: null,
+        view: 'playtest',
         filters: { ...EMPTY_FILTERS },
         toast: { id: state.toastSeq + 1, message: 'Demo data restored', tone: 'ok' },
         toastSeq: state.toastSeq + 1,

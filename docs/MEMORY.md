@@ -106,3 +106,17 @@ wins for progress and this file wins for intent.
 - Pipeline stages 3-4 are rules, not a model call. Fast, offline, explainable.
 - The agent team runs from the CLI; it is not orchestrated by a server.
 - The test build's defects are planted, not emergent, so the demo is repeatable.
+
+## Onboarding flow (2026-11-02)
+
+- First load lands on the game, not the dashboard. After the walkthrough it lands
+  on the overview and stays there (settings.onboarded).
+- 0.5.0 has exactly two defects, both verified in a browser:
+    coins 3 -> score 1 (score only moves every second coin)
+    villain contact does nothing at all
+  0.5.1: coins 3 -> score 3, and a villain ends the run.
+- Coins sit in a fixed row at y=270 so the demo is repeatable.
+- Submitting a report opens the pipeline walkthrough (9 stages, ~11s, skippable),
+  then "Open the workspace" reveals the dashboard.
+- Fixed while verifying: after the walkthrough the report drawer opened by itself
+  and made the page inert. run/finish now clears selectedId.

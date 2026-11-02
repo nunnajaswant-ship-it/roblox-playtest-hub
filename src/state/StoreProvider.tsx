@@ -11,10 +11,13 @@ function createInitialState(): AppState {
   const loaded = loadDatabase(adapter);
 
   return {
-    db: loaded.error ? { ...loaded.db, settings: { lastLoadError: loaded.error } } : loaded.db,
+    db: loaded.error
+      ? { ...loaded.db, settings: { ...loaded.db.settings, lastLoadError: loaded.error } }
+      : loaded.db,
     filters: { ...EMPTY_FILTERS },
-    view: 'overview',
+    view: loaded.db.settings.onboarded ? 'overview' : 'playtest',
     selectedId: null,
+    runId: null,
     formOpen: false,
     toast: loaded.error ? { id: 1, message: loaded.error, tone: 'warn' } : null,
     toastSeq: 1,

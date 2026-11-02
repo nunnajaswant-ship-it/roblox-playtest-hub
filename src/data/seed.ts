@@ -269,6 +269,6 @@ export function seedDatabase(): Database {
       history: report.history.map((item) => ({ ...item }))
     })),
     activeBuildId: 'b-050',
-    settings: { lastLoadError: null }
+    settings: { lastLoadError: null, onboarded: false }
   };
 }

@@ -44,7 +44,10 @@ export function loadDatabase(adapter: StorageAdapter): LoadResult {
 
   const db: Database = {
     ...check.db,
-    settings: check.db.settings ?? { lastLoadError: null }
+    settings: {
+      lastLoadError: null,
+      onboarded: check.db.settings?.onboarded ?? false
+    }
   };
 
   return { db, source: 'storage', error: null };
@@ -78,7 +81,10 @@ export function importDatabase(
     ok: true,
     db: {
       ...check.db,
-      settings: { lastLoadError: null }
+      settings: {
+        lastLoadError: null,
+        onboarded: check.db.settings?.onboarded ?? false
+      }
     }
   };
 }
