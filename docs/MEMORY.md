@@ -120,3 +120,10 @@ wins for progress and this file wins for intent.
   then "Open the workspace" reveals the dashboard.
 - Fixed while verifying: after the walkthrough the report drawer opened by itself
   and made the page inert. run/finish now clears selectedId.
+
+## Pitch deck (2026-11-02)
+
+- public/pitch.html: 17 slides, single file, no external fonts or scripts.
+- Arrow keys, Space, PageUp/Down, Home/End, click buttons, touch swipe.
+- Progress bar, slide counter, deep link via #slide, print-to-PDF CSS.
+- Linked from the sidebar footer. Served at /pitch.html and openable from disk.

@@ -50,6 +50,8 @@ export function Nav() {
         Press <span className="mono">N</span> for a new report,
         <br />
         <span className="mono">/</span> to search.
+        <br />
+        <a href="/pitch.html" target="_blank" rel="noreferrer">Pitch deck</a>
       </div>
     </nav>
   );

@@ -1,0 +1,1155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Survey Corps - Playtest Hub</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<style>
+  :root {
+    --ink-900: #06090f;
+    --ink-850: #0a0f18;
+    --ink-800: #0d131d;
+    --ink-750: #111925;
+    --ink-700: #16202e;
+    --ink-600: #1e2939;
+    --ink-500: #2a374b;
+    --ink-400: #4a5a72;
+    --ink-300: #6f8099;
+    --text-100: #f1f5fb;
+    --text-200: #c3d0e2;
+    --text-300: #94a5bd;
+    --accent: #38e8ff;
+    --accent-dim: #1a8fa3;
+    --red: #ff4d6d;
+    --amber: #ffd166;
+    --orange: #ff9f43;
+    --green: #3ddc97;
+    --violet: #a78bfa;
+    --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "Cascadia Code", "Consolas", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--ink-900);
+    color: var(--text-100);
+    font-family: var(--font);
+    overflow: hidden;
+  }
+
+  .deck {
+    position: relative;
+    height: 100dvh;
+    width: 100vw;
+    background:
+      radial-gradient(1200px 700px at 12% -10%, rgba(56, 232, 255, 0.07), transparent 60%),
+      radial-gradient(900px 600px at 95% 110%, rgba(167, 139, 250, 0.06), transparent 60%),
+      var(--ink-900);
+  }
+
+  .deck::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+    background-size: 64px 64px;
+    pointer-events: none;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: clamp(30px, 5vw, 72px);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(16px);
+    transition: opacity 320ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s linear 320ms;
+  }
+
+  .slide.is-active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition-delay: 0s;
+  }
+
+  .inner {
+    width: min(1180px, 100%);
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(16px, 2.4vh, 30px);
+  }
+
+  .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: clamp(10px, 0.95vw, 12px);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .kicker::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(38px, 5.6vw, 76px);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    font-weight: 680;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: clamp(28px, 3.6vw, 48px);
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    font-weight: 660;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: clamp(15px, 1.35vw, 19px);
+    line-height: 1.3;
+    font-weight: 640;
+  }
+
+  .lead {
+    font-size: clamp(16px, 1.65vw, 24px);
+    line-height: 1.5;
+    color: var(--text-200);
+    max-width: 62ch;
+    margin: 0;
+  }
+
+  .muted { color: var(--text-300); }
+  .accent { color: var(--accent); }
+  .red { color: var(--red); }
+  .green { color: var(--green); }
+  .amber { color: var(--amber); }
+
+  .row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .col { display: flex; flex-direction: column; gap: 14px; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 1.6vw, 24px); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 1.6vw, 22px); }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+
+  .card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.028), rgba(255, 255, 255, 0.008));
+    border: 1px solid var(--ink-600);
+    border-radius: 14px;
+    padding: clamp(16px, 1.8vw, 24px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .card.is-red { border-color: rgba(255, 77, 109, 0.35); background: rgba(255, 77, 109, 0.05); }
+  .card.is-green { border-color: rgba(61, 220, 151, 0.32); background: rgba(61, 220, 151, 0.05); }
+  .card.is-accent { border-color: rgba(56, 232, 255, 0.32); background: rgba(56, 232, 255, 0.045); }
+
+  .card-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-300);
+  }
+
+  .card p {
+    margin: 0;
+    font-size: clamp(13px, 1.12vw, 15.5px);
+    line-height: 1.55;
+    color: var(--text-200);
+  }
+
+  ul.clean {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  ul.clean li {
+    position: relative;
+    padding-left: 22px;
+    font-size: clamp(14px, 1.2vw, 17px);
+    line-height: 1.5;
+    color: var(--text-200);
+  }
+
+  ul.clean li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    background: var(--accent);
+  }
+
+  ul.clean li.no::before { background: var(--red); }
+  ul.clean li.yes::before { background: var(--green); }
+
+  .quote {
+    font-size: clamp(22px, 2.7vw, 38px);
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    font-weight: 520;
+    color: var(--text-100);
+    border-left: 3px solid var(--red);
+    padding-left: clamp(16px, 2vw, 26px);
+  }
+
+  .quote small {
+    display: block;
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-300);
+    font-weight: 400;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-value {
+    font-family: var(--mono);
+    font-size: clamp(30px, 3.4vw, 46px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-label {
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-300);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--ink-500);
+    font-size: 12px;
+    color: var(--text-200);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .pill.is-red { border-color: rgba(255, 77, 109, 0.45); color: #ffb3c1; }
+  .pill.is-green { border-color: rgba(61, 220, 151, 0.45); color: #a9f2cf; }
+  .pill.is-accent { border-color: rgba(56, 232, 255, 0.45); color: #b6f4ff; }
+
+  .flow {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .flow-step {
+    flex: 1 1 0;
+    min-width: 130px;
+    border: 1px solid var(--ink-600);
+    border-radius: 12px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.02);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .flow-step b { font-size: 14px; font-weight: 650; }
+  .flow-step span { font-size: 12px; color: var(--ink-300); line-height: 1.45; }
+  .flow-arrow { display: grid; place-items: center; color: var(--ink-400); font-size: 18px; }
+
+  .code {
+    font-family: var(--mono);
+    font-size: clamp(11px, 1.05vw, 13.5px);
+    line-height: 1.75;
+    background: #05080d;
+    border: 1px solid var(--ink-600);
+    border-radius: 12px;
+    padding: 16px 18px;
+    color: var(--text-200);
+    white-space: pre;
+    overflow: auto;
+  }
+
+  .code .c { color: var(--accent); }
+  .code .g { color: var(--green); }
+  .code .a { color: var(--amber); }
+  .code .d { color: var(--ink-300); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(12px, 1.05vw, 14.5px);
+  }
+
+  th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-300);
+    font-weight: 500;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--ink-600);
+  }
+
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(30, 41, 57, 0.7);
+    color: var(--text-200);
+    vertical-align: top;
+    line-height: 1.45;
+  }
+
+  td:first-child { color: var(--text-100); font-weight: 550; white-space: nowrap; }
+
+  .hint-key {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--ink-400);
+    transition: opacity 400ms ease;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .hint-key.is-hidden { opacity: 0; }
+
+  .hud {
+    position: fixed;
+    right: 22px;
+    bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 20;
+  }
+
+  .counter {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-300);
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nav-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    border: 1px solid var(--ink-500);
+    background: var(--ink-750);
+    color: var(--text-100);
+    font-size: 16px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+
+  .nav-btn:hover { background: var(--ink-600); border-color: var(--ink-400); }
+  .nav-btn:disabled { opacity: 0.35; cursor: default; }
+
+  .progress {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--violet));
+    width: 0;
+    transition: width 320ms ease;
+    z-index: 20;
+  }
+
+  .title-mark {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(56, 232, 255, 0.4);
+    background: rgba(56, 232, 255, 0.08);
+    font-family: var(--mono);
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 17px;
+    letter-spacing: 0.04em;
+  }
+
+  .footnote {
+    font-size: 12px;
+    color: var(--ink-400);
+    line-height: 1.5;
+  }
+
+  .divider { height: 1px; background: var(--ink-600); width: 100%; }
+
+  .big-num {
+    font-family: var(--mono);
+    font-size: clamp(13px, 1.1vw, 15px);
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  @media (max-width: 900px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .flow-step { min-width: 100%; }
+    .flow-arrow { display: none; }
+    .hint-key { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide, .progress, .hint-key { transition: none; }
+  }
+
+  @media print {
+    html, body { overflow: visible; background: #fff; }
+    .deck { height: auto; }
+    .slide {
+      position: relative;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      height: 100vh;
+      page-break-after: always;
+      break-after: page;
+    }
+    .hud, .hint-key, .progress { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- 1 -->
+  <section class="slide is-active" data-slide="1" aria-label="Title">
+    <div class="inner">
+      <div class="row" style="gap: 16px;">
+        <div class="title-mark">SC</div>
+        <div class="col" style="gap: 2px;">
+          <span class="kicker" style="border: 0;">Survey Corps</span>
+          <span class="footnote">Roblox experience QA</span>
+        </div>
+      </div>
+
+      <h1 style="max-width: 16ch;">Playtest Hub</h1>
+      <p class="lead">
+        Turn <span class="muted">"the obby is broken"</span> into a reproducible report,
+        an explainable severity, and a fix that lands on a branch nobody can merge by accident.
+      </p>
+
+      <div class="row" style="margin-top: 6px;">
+        <span class="pill is-accent">intake</span>
+        <span class="pill is-accent">pipeline</span>
+        <span class="pill is-accent">agent repair</span>
+        <span class="pill is-green">human gate</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="row" style="justify-content: space-between; align-items: flex-end;">
+        <div class="col" style="gap: 4px;">
+          <span class="card-label">Team</span>
+          <span style="font-size: 15px;">Nunna &middot; Abhiram &middot; Abhitej</span>
+        </div>
+        <div class="col" style="gap: 4px; text-align: right;">
+          <span class="card-label">Repository</span>
+          <span class="footnote" style="font-family: var(--mono);">github.com/nunnajaswant-ship-it/roblox-playtest-hub</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide" data-slide="2" aria-label="Problem">
+    <div class="inner">
+      <span class="kicker">01 / The problem</span>
+      <div class="quote">
+        "the obby is broken"<br />
+        "the shop doesn't work"
+        <small>Actual feedback, every single update</small>
+      </div>
+
+      <div class="grid-3">
+        <div class="card is-red">
+          <span class="card-label">Missing build</span>
+          <p>Which version? v0.5.0 or the one from yesterday? Without a build, a report describes a game that no longer exists.</p>
+        </div>
+        <div class="card is-red">
+          <span class="card-label">Missing reproduction</span>
+          <p>No steps, no device, no expected result. A developer spends the first twenty minutes asking questions, not fixing.</p>
+        </div>
+        <div class="card is-red">
+          <span class="card-label">Missing owner</span>
+          <p>It scrolls away in Discord. Nothing is assigned, nothing is verified, and the same bug is reported three times.</p>
+        </div>
+      </div>
+
+      <p class="lead">
+        The missing artifact is not a chat. It is a <span class="accent">reproducible report</span>,
+        with a severity a team can defend and an owner who is accountable.
+      </p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide" data-slide="3" aria-label="Why current tools fail">
+    <div class="inner">
+      <span class="kicker">02 / The gap</span>
+      <h2>Every existing tool solves one third of this</h2>
+
+      <table>
+        <thead>
+          <tr><th>Tool</th><th>What it does</th><th>What it still leaves to a human</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Discord</td><td>fast capture</td><td>everything else: build, repro, severity, ownership, verification</td></tr>
+          <tr><td>Google Form</td><td>collects fields</td><td>whether the report is reproducible at all; no triage, no state</td></tr>
+          <tr><td>Jira / Trello</td><td>workflow states</td><td>playtest context, build discipline, severity that means something</td></tr>
+          <tr><td>Coding agents</td><td>fast edits</td><td>judgement, isolation, and any guarantee that main still works</td></tr>
+        </tbody>
+      </table>
+
+      <div class="card is-accent">
+        <span class="card-label">Our bet</span>
+        <p style="font-size: clamp(15px, 1.3vw, 18px); color: var(--text-100);">
+          The unit of work is not a message or a ticket. It is a <b>report that survives the handoff</b>,
+          moving through a pipeline where every stage produces evidence the next stage can trust.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide" data-slide="4" aria-label="Solution loop">
+    <div class="inner">
+      <span class="kicker">03 / The loop</span>
+      <h2>One loop, six artifacts</h2>
+
+      <div class="flow">
+        <div class="flow-step">
+          <span class="big-num">01</span>
+          <b>Play</b>
+          <span>a real build, in the browser, with two versions side by side</span>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+          <span class="big-num">02</span>
+          <b>Report</b>
+          <span>build, area, expected, actual, steps, evidence</span>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+          <span class="big-num">03</span>
+          <b>Pipeline</b>
+          <span>reproducibility, severity, confidence, route</span>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+          <span class="big-num">04</span>
+          <b>Agent team</b>
+          <span>five scoped agents on branch fix/PH-&lt;ref&gt;</span>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+          <span class="big-num">05</span>
+          <b>Human gate</b>
+          <span>a person marks Verified, or nothing merges</span>
+        </div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step">
+          <span class="big-num">06</span>
+          <b>Release</b>
+          <span>main moves; the old build stays playable</span>
+        </div>
+      </div>
+
+      <p class="lead">
+        Each step hands the next one an artifact: a report, a score, a work order, a patch, a test result, an approval.
+      </p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide" data-slide="5" aria-label="Intake">
+    <div class="inner">
+      <span class="kicker">04 / Intake</span>
+      <h2>A report a stranger can reproduce</h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <span class="card-label">Required fields</span>
+          <ul class="clean">
+            <li>Build and version the tester actually played</li>
+            <li>Area: stage, shop, HUD, checkout</li>
+            <li>Expected vs actual, in the tester's own words</li>
+            <li>Ordered reproduction steps</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="card-label">Honesty rails</span>
+          <ul class="clean">
+            <li>Severity has written definitions, so two testers agree</li>
+            <li>Screenshot link is validated as http(s), never rendered as HTML</li>
+            <li>Duplicate suggestions are advisory and always explain themselves</li>
+            <li>No steps means the pipeline asks a question instead of guessing</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="code"><span class="d">// every field is validated by one pure function,</span>
+<span class="d">// used by the form AND the import path</span>
+<span class="c">validateReport</span>(draft) <span class="d">-&gt;</span> <span class="a">{ title?: "...", actual?: "..." }</span></div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide" data-slide="6" aria-label="Severity">
+    <div class="inner">
+      <span class="kicker">05 / Triage</span>
+      <h2>Severity is computed, printed, and reproducible</h2>
+
+      <div class="grid-2" style="align-items: start;">
+        <div class="code"><span class="d">// deterministic. no model call. no network.</span>
+<span class="c">score</span> = 30 base
+      + category   <span class="a">shop 20, data 18, obby 16,</span>
+                   <span class="a">gameplay 14, perf 10, ui 8</span>
+      + frequency  <span class="a">always 20, often 14,</span>
+                   <span class="a">sometimes 8, once 3</span>
+      + platform   <span class="a">mobile 10, console 8, pc 6</span>
+      + impact     <span class="a">robux, lost, save, crash...</span>
+                   <span class="a">+8 each, max 24</span>
+
+<span class="c">85+</span> blocker   <span class="c">70+</span> high
+<span class="c">52+</span> medium    <span class="c">&lt;52</span> low</div>
+
+        <div class="col">
+          <div class="card is-accent">
+            <span class="card-label">Why this wins points</span>
+            <p>
+              A judge can watch the same report score the same number twice, offline.
+              No hidden model, no variance, no "the AI decided".
+            </p>
+          </div>
+          <div class="card">
+            <span class="card-label">Confidence is separate</span>
+            <p>
+              Evidence quality unlocks routing. Two or more steps, a screenshot and a
+              detailed actual raise confidence. Below 60% the pipeline refuses to route
+              and asks the tester one specific question.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide" data-slide="7" aria-label="Routing">
+    <div class="inner">
+      <span class="kicker">06 / Routing</span>
+      <h2>Who acts on it is an explicit decision</h2>
+
+      <table>
+        <thead>
+          <tr><th>Condition</th><th>Route</th><th>Who acts</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>confidence &lt; 60%</td><td class="amber">Needs more information</td><td>the tester, with one specific question</td></tr>
+          <tr><td>blocker or high</td><td class="red">Human required</td><td>a person decides the approach before code changes</td></tr>
+          <tr><td>tester vs pipeline differ by 2 levels</td><td class="red">Human required</td><td>a person breaks the tie</td></tr>
+          <tr><td>medium</td><td class="accent">Agent repair + human review</td><td>agent team, then a person checks</td></tr>
+          <tr><td>low</td><td class="green">Agent repair, auto</td><td>agent team on a branch</td></tr>
+        </tbody>
+      </table>
+
+      <p class="lead">
+        The pipeline never overrules a tester silently. Disagreement escalates to a person,
+        not to a bigger model.
+      </p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide" data-slide="8" aria-label="Novelty">
+    <div class="inner">
+      <span class="kicker">07 / Novelty</span>
+      <h2>Three claims we can defend</h2>
+
+      <div class="grid-3">
+        <div class="card is-accent">
+          <span class="big-num">01</span>
+          <h3>Explainable triage</h3>
+          <p>Every severity shows its arithmetic and its confidence. Same report, same score, every time, with no network dependency.</p>
+        </div>
+        <div class="card is-accent">
+          <span class="big-num">02</span>
+          <h3>Branch-isolated repair</h3>
+          <p>Agents work only on <span style="font-family: var(--mono);">fix/PH-&lt;ref&gt;</span>. The main line is not theirs to touch, and the previous build stays playable exactly as shipped.</p>
+        </div>
+        <div class="card is-accent">
+          <span class="big-num">03</span>
+          <h3>A human owns the merge</h3>
+          <p>The reviewer agent blocks unless a person has marked the report Verified. Automation proposes; a human disposes.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <p style="font-size: clamp(15px, 1.3vw, 18px); color: var(--text-100);">
+          The novelty is not "an AI fixes bugs". It is a <b>pipeline where every handoff is auditable</b>:
+          report, score, route, work order, patch, self-test, approval.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide" data-slide="9" aria-label="Agent team">
+    <div class="inner">
+      <span class="kicker">08 / The agent team</span>
+      <h2>Five agents, each with one job and no merge rights</h2>
+
+      <table>
+        <thead>
+          <tr><th>Agent</th><th>Job</th><th>Hard constraint</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>reproducer</td><td>shortest exact reproduction</td><td>read-only, cannot propose a fix</td></tr>
+          <tr><td>severity</td><td>challenge the score against written definitions</td><td>must escalate a 2-level disagreement</td></tr>
+          <tr><td>fixer</td><td>smallest correct patch on the branch</td><td>never main, never widen scope, test before claiming</td></tr>
+          <tr><td>selftest</td><td>try to prove the fix is wrong</td><td>cannot pass without executing the reproduction</td></tr>
+          <tr><td>reviewer</td><td>merge gate</td><td>blocks without a human Verified mark</td></tr>
+        </tbody>
+      </table>
+
+      <div class="row">
+        <span class="pill">5 prompts in <span style="font-family: var(--mono);">&nbsp;pipeline/agents/</span></span>
+        <span class="pill">registered in <span style="font-family: var(--mono);">&nbsp;opencode.jsonc</span></span>
+        <span class="pill is-green">leaves, not managers</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide" data-slide="10" aria-label="Safety">
+    <div class="inner">
+      <span class="kicker">09 / Safety</span>
+      <h2>Nothing reaches main by accident</h2>
+
+      <div class="flow">
+        <div class="flow-step"><span class="big-num">A</span><b>Report</b><span>PH-101, scored, routed</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step"><span class="big-num">B</span><b>Work order</b><span>fix/PH-101, scope fixed</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step"><span class="big-num">C</span><b>Patch</b><span>branch only, tests added</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step"><span class="big-num">D</span><b>Self-test</b><span>repro + regression pass</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-step"><span class="big-num">E</span><b>Human Verified</b><span>the only key to main</span></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card is-green">
+          <span class="card-label">Version safety, concretely</span>
+          <p>
+            Build <b>0.5.0</b> and <b>0.5.1</b> both ship in the app. The old build is always one
+            click away, so "we did not break the previous version" is a thing you can check,
+            not a promise.
+          </p>
+        </div>
+        <div class="card">
+          <span class="card-label">Rollback is trivial</span>
+          <p>
+            Because a fix is a branch, reverting it restores the previous build exactly.
+            There is no untangling of a half-merged agent edit.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide" data-slide="11" aria-label="Demo">
+    <div class="inner">
+      <span class="kicker">10 / Demo</span>
+      <h2>What you are about to watch</h2>
+
+      <div class="grid-4">
+        <div class="card">
+          <span class="big-num">00:00</span>
+          <h3>Play</h3>
+          <p>Build 0.5.0. Hold left along the coin row. Coins 3, score 1.</p>
+        </div>
+        <div class="card">
+          <span class="big-num">00:20</span>
+          <h3>Find</h3>
+          <p>Walk into a red villain. Nothing happens. Two bugs, two reports.</p>
+        </div>
+        <div class="card">
+          <span class="big-num">00:50</span>
+          <h3>Pipeline</h3>
+          <p>Score, confidence, route, work order, branch. Sidebar disappears and the chain plays out.</p>
+        </div>
+        <div class="card">
+          <span class="big-num">01:30</span>
+          <h3>Prove</h3>
+          <p>Switch to 0.5.1: coins 3, score 3, villain eliminates. Human marks Verified.</p>
+        </div>
+      </div>
+
+      <div class="card is-accent">
+        <span class="card-label">The line to say</span>
+        <p style="font-size: clamp(15px, 1.35vw, 19px); color: var(--text-100);">
+          "The pipeline will not let an agent decide a blocker. And it will not let one merge without a person."
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide" data-slide="12" aria-label="Evidence">
+    <div class="inner">
+      <span class="kicker">11 / Evidence</span>
+      <h2>Numbers we actually ran</h2>
+
+      <div class="grid-3">
+        <div class="stat"><span class="stat-value green">3 &rarr; 1</span><span class="stat-label">coins to score, build 0.5.0</span></div>
+        <div class="stat"><span class="stat-value green">3 &rarr; 3</span><span class="stat-label">coins to score, build 0.5.1</span></div>
+        <div class="stat"><span class="stat-value">41</span><span class="stat-label">domain and reducer tests passing</span></div>
+        <div class="stat"><span class="stat-value">90<small style="font-size: 16px;"> kB</small></span><span class="stat-label">gzipped production bundle</span></div>
+        <div class="stat"><span class="stat-value">0</span><span class="stat-label">console errors on a cold load</span></div>
+        <div class="stat"><span class="stat-value">9</span><span class="stat-label">pipeline stages, animated live</span></div>
+      </div>
+
+      <table>
+        <thead><tr><th>Check</th><th>Method</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Coin defect</td><td>real browser run on 0.5.0, hold left</td><td class="green">coins 3, score 1</td></tr>
+          <tr><td>Villain defect</td><td>walk into a villain</td><td class="green">no death</td></tr>
+          <tr><td>Fix</td><td>same run on 0.5.1</td><td class="green">coins 3, score 3, ELIMINATED</td></tr>
+          <tr><td>Persistence</td><td>file a report, reload</td><td class="green">report and score survive</td></tr>
+          <tr><td>Mobile</td><td>375x667 viewport</td><td class="green">no horizontal overflow</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide" data-slide="13" aria-label="Tech stack">
+    <div class="inner">
+      <span class="kicker">12 / Tech stack</span>
+      <h2>Small stack, chosen for reasons</h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <span class="card-label">Chosen</span>
+          <table style="font-size: 13px;">
+            <tbody>
+              <tr><td>React 19.3</td><td>one page, no routing library needed</td></tr>
+              <tr><td>TypeScript 7</td><td>the data model is the product</td></tr>
+              <tr><td>Vite 8.3</td><td>instant dev, one-command static build</td></tr>
+              <tr><td>Vitest 5</td><td>domain logic tested without a browser</td></tr>
+              <tr><td>localStorage</td><td>behind a StorageAdapter interface</td></tr>
+              <tr><td>Canvas 2D</td><td>the test build, no engine dependency</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <span class="card-label">Rejected, and why</span>
+          <ul class="clean">
+            <li class="no">Next.js - no server, no SEO, no routing problem to solve</li>
+            <li class="no">Supabase - auth and network for a one-day build</li>
+            <li class="no">Tailwind - ~30 design tokens, not a utility system</li>
+            <li class="no">Component library - makes it look like every admin panel</li>
+            <li class="no">Chart library - two shapes, hand-rolled SVG</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="footnote">
+        No backend means no auth screen, no deploy secrets, and a demo that runs offline on the
+        venue laptop. The adapter seam is the whole migration story.
+      </p>
+    </div>
+  </section>
+
+  <!-- 14 -->
+  <section class="slide" data-slide="14" aria-label="Architecture">
+    <div class="inner">
+      <span class="kicker">13 / Architecture</span>
+      <h2>Dependencies point one way</h2>
+
+      <div class="grid-2" style="align-items: start;">
+        <div class="code"><span class="c">views/</span>      overview, test build, triage,
+             reports, pipeline, readiness, data
+<span class="c">components/</span> board, cards, form, drawer, toasts
+<span class="c">state/</span>      reducer + context (Fast Refresh safe)
+<span class="c">pipeline/</span>   triage.ts: score, route, work order
+<span class="c">domain/</span>     types, similarity, readiness,
+             validation, filters  <span class="g">&lt;- pure</span>
+<span class="c">data/</span>       repository -&gt; StorageAdapter
+<span class="c">browser</span>     localStorage</div>
+
+        <div class="col">
+          <div class="card">
+            <span class="card-label">The seam</span>
+            <p style="font-family: var(--mono); font-size: 12.5px; color: var(--text-100);">
+              interface StorageAdapter {<br />
+              &nbsp;&nbsp;read(key): string | null<br />
+              &nbsp;&nbsp;write(key, value): void<br />
+              &nbsp;&nbsp;remove(key): void<br />
+              }
+            </p>
+            <p>A backend is one new class. No view changes.</p>
+          </div>
+          <div class="card is-green">
+            <span class="card-label">Why it matters</span>
+            <p>
+              <span style="font-family: var(--mono);">domain/</span> has no React and no browser API.
+              That is why 41 tests run in under half a second and why the same validation
+              runs in the form and on import.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 -->
+  <section class="slide" data-slide="15" aria-label="Honest scope">
+    <div class="inner">
+      <span class="kicker">14 / Scope</span>
+      <h2>What is real, and what is scoped</h2>
+
+      <div class="grid-2">
+        <div class="card is-green">
+          <span class="card-label">Real, and demonstrable</span>
+          <ul class="clean">
+            <li class="yes">intake, validation, duplicate detection</li>
+            <li class="yes">deterministic severity and confidence</li>
+            <li class="yes">routing, work orders, branch isolation</li>
+            <li class="yes">five agent prompts, one executed live</li>
+            <li class="yes">human Verified gate, persistence, export</li>
+          </ul>
+        </div>
+        <div class="card is-red">
+          <span class="card-label">Scoped for the day, and stated</span>
+          <ul class="clean">
+            <li class="no">pipeline runs in-browser, not behind a server</li>
+            <li class="no">agents are CLI-invoked, not orchestrated by a queue</li>
+            <li class="no">single browser, single device; no multi-user sync</li>
+            <li class="no">test build defects are planted so the demo repeats</li>
+            <li class="no">no Roblox API ingestion yet</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="lead">
+        We would rather show a narrow thing that is true than a wide thing that is a slide.
+      </p>
+    </div>
+  </section>
+
+  <!-- 16 -->
+  <section class="slide" data-slide="16" aria-label="Roadmap">
+    <div class="inner">
+      <span class="kicker">15 / Next</span>
+      <h2>What the next day buys</h2>
+
+      <div class="grid-3">
+        <div class="card">
+          <span class="big-num">01</span>
+          <h3>Backend adapter</h3>
+          <p>One class behind StorageAdapter. Real accounts, real multi-user triage, same UI.</p>
+        </div>
+        <div class="card">
+          <span class="big-num">02</span>
+          <h3>Queue, not CLI</h3>
+          <p>A worker picks up work orders, runs the five agents, and writes results back to the report.</p>
+        </div>
+        <div class="card">
+          <span class="big-num">03</span>
+          <h3>Roblox ingestion</h3>
+          <p>Pull build metadata and crash signals from Open Cloud so the build list is not typed by hand.</p>
+        </div>
+      </div>
+
+      <div class="card is-accent">
+        <span class="card-label">What does not change</span>
+        <p>
+          The two rules: agents never touch main, and a human marks Verified.
+          Everything else can be rebuilt around them.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 -->
+  <section class="slide" data-slide="17" aria-label="Close">
+    <div class="inner">
+      <span class="kicker">Survey Corps</span>
+      <h1 style="font-size: clamp(34px, 4.4vw, 60px);">Playtest Hub</h1>
+      <p class="lead">
+        A report that survives the handoff, a score you can defend, and a fix that cannot
+        reach main without a person saying yes.
+      </p>
+
+      <div class="divider"></div>
+
+      <div class="row" style="justify-content: space-between; gap: 24px;">
+        <div class="col" style="gap: 6px;">
+          <span class="card-label">Repository</span>
+          <span style="font-family: var(--mono); font-size: 13px;">github.com/nunnajaswant-ship-it/roblox-playtest-hub</span>
+        </div>
+        <div class="col" style="gap: 6px; text-align: right;">
+          <span class="card-label">Run it</span>
+          <span style="font-family: var(--mono); font-size: 13px;">npm install &amp;&amp; npm run dev</span>
+        </div>
+      </div>
+
+      <p class="footnote">Thank you. Questions are welcome, especially the hard ones.</p>
+    </div>
+  </section>
+
+</div>
+
+<div class="hint-key" id="hint">Use &larr; &rarr; or Space to move</div>
+
+<div class="hud">
+  <span class="counter" id="counter" aria-live="polite">01 / 17</span>
+  <button class="nav-btn" id="prev" aria-label="Previous slide">&larr;</button>
+  <button class="nav-btn" id="next" aria-label="Next slide">&rarr;</button>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var counter = document.getElementById('counter');
+  var progress = document.getElementById('progress');
+  var hint = document.getElementById('hint');
+  var prevBtn = document.getElementById('prev');
+  var nextBtn = document.getElementById('next');
+  var index = 0;
+  var hintTimer;
+
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+  function render() {
+    slides.forEach(function (slide, i) {
+      slide.classList.toggle('is-active', i === index);
+      slide.setAttribute('aria-hidden', i === index ? 'false' : 'true');
+    });
+
+    counter.textContent = pad(index + 1) + ' / ' + pad(slides.length);
+    progress.style.width = ((index + 1) / slides.length) * 100 + '%';
+    prevBtn.disabled = index === 0;
+    nextBtn.disabled = index === slides.length - 1;
+
+    if (history.replaceState) {
+      history.replaceState(null, '', '#' + (index + 1));
+    }
+  }
+
+  function go(next) {
+    var clamped = Math.max(0, Math.min(slides.length - 1, next));
+    if (clamped === index) return;
+    index = clamped;
+    render();
+  }
+
+  function dismissHint() {
+    clearTimeout(hintTimer);
+    hint.classList.add('is-hidden');
+  }
+
+  document.addEventListener('keydown', function (event) {
+    var key = event.key;
+
+    if (key === 'ArrowRight' || key === 'PageDown' || key === ' ' || key === 'Enter') {
+      event.preventDefault();
+      dismissHint();
+      go(index + 1);
+      return;
+    }
+
+    if (key === 'ArrowLeft' || key === 'PageUp' || key === 'Backspace') {
+      event.preventDefault();
+      dismissHint();
+      go(index - 1);
+      return;
+    }
+
+    if (key === 'Home') { event.preventDefault(); go(0); return; }
+    if (key === 'End') { event.preventDefault(); go(slides.length - 1); return; }
+  });
+
+  prevBtn.addEventListener('click', function () { dismissHint(); go(index - 1); });
+  nextBtn.addEventListener('click', function () { dismissHint(); go(index + 1); });
+
+  var touchStartX = null;
+  document.addEventListener('touchstart', function (event) {
+    touchStartX = event.changedTouches[0].clientX;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function (event) {
+    if (touchStartX === null) return;
+    var delta = event.changedTouches[0].clientX - touchStartX;
+    touchStartX = null;
+    if (Math.abs(delta) < 50) return;
+    dismissHint();
+    go(index + (delta < 0 ? 1 : -1));
+  }, { passive: true });
+
+  var fromHash = parseInt((location.hash || '').replace('#', ''), 10);
+  if (!isNaN(fromHash) && fromHash >= 1 && fromHash <= slides.length) {
+    index = fromHash - 1;
+  }
+
+  render();
+  hintTimer = setTimeout(dismissHint, 5000);
+})();
+</script>
+</body>
+</html>
