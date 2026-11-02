@@ -1,6 +1,4 @@
-# Netlify build configuration.
-# Deploying is a separate, explicitly approved action. This file only defines
-# what Netlify should run when the repository is connected.
+# Static site. No server, no environment variables, no secrets.
 
 [build]
   command = "npm run build"
@@ -13,3 +11,8 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
