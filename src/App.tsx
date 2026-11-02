@@ -33,6 +33,7 @@ function Workspace() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (isTyping(event.target) || formOpen) return;
+      if (document.querySelector('dialog[open]')) return;
 
       if (event.key === 'n' || event.key === 'N') {
         event.preventDefault();

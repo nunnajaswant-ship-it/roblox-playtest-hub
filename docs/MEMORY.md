@@ -127,3 +127,15 @@ wins for progress and this file wins for intent.
 - Arrow keys, Space, PageUp/Down, Home/End, click buttons, touch swipe.
 - Progress bar, slide counter, deep link via #slide, print-to-PDF CSS.
 - Linked from the sidebar footer. Served at /pitch.html and openable from disk.
+
+## Defect: WASD did not type in inputs (2026-11-02)
+
+- Cause: the test build listens on window and called preventDefault for WASD and
+  arrow keys unconditionally, so it swallowed the letters while a field had focus.
+- Fix: ignore the event when the target is an input/textarea/select/contenteditable
+  or when any dialog is open; only preventDefault while the run is actually live.
+  Keyup always releases, and window blur clears held keys.
+- App shortcuts (N, /) now also bail out when a dialog is open.
+- Verified with real keystrokes: typed "wasd test with all letters" into the report
+  title, "wasd asdf sad" into the textarea, and "wasd" into the search field. Game
+  still responds when nothing is focused (coins 3, score 1 on build 0.5.0).

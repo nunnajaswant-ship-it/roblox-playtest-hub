@@ -84,18 +84,54 @@ export function TestBuild({ variant }: Props) {
     s.running = false;
     setHud({ coins: 0, score: 0, time: 30, dead: false, running: false });
 
+    const GAME_KEYS = ['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd'];
+
+    /**
+     * The game listens on window, so it must never steal keys from a text field
+     * or from an open dialog. Without this, typing "wasd" into the bug report
+     * does nothing because the game calls preventDefault first.
+     */
+    const isEditableTarget = (target: EventTarget | null): boolean => {
+      if (!(target instanceof HTMLElement)) return false;
+      const tag = target.tagName;
+      return (
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
+        target.isContentEditable
+      );
+    };
+
+    const isBlocked = (event: KeyboardEvent): boolean =>
+      isEditableTarget(event.target) ||
+      document.querySelector('dialog[open]') !== null;
+
     const onKey = (event: KeyboardEvent, down: boolean) => {
       const key = event.key.toLowerCase();
-      if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd'].includes(key)) {
-        event.preventDefault();
-        if (down) s.keys.add(key);
-        else s.keys.delete(key);
+
+      if (!GAME_KEYS.includes(key)) return;
+
+      // Always release a held key, even if focus moved into a field.
+      if (!down) {
+        s.keys.delete(key);
+        return;
       }
+
+      if (isBlocked(event)) {
+        s.keys.delete(key);
+        return;
+      }
+
+      if (s.running) event.preventDefault();
+      s.keys.add(key);
     };
     const kd = (e: KeyboardEvent) => onKey(e, true);
     const ku = (e: KeyboardEvent) => onKey(e, false);
+    const releaseAll = () => s.keys.clear();
+
     window.addEventListener('keydown', kd);
     window.addEventListener('keyup', ku);
+    window.addEventListener('blur', releaseAll);
 
     let raf = 0;
     let last = performance.now();
@@ -224,6 +260,7 @@ export function TestBuild({ variant }: Props) {
       cancelAnimationFrame(raf);
       window.removeEventListener('keydown', kd);
       window.removeEventListener('keyup', ku);
+      window.removeEventListener('blur', releaseAll);
     };
   }, [variant]);
 
