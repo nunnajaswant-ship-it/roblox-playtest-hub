@@ -1,0 +1,23 @@
+node_modules/
+dist/
+.vite/
+
+# Browser QA evidence written by the playwright / chrome-devtools MCP servers.
+.playwright-mcp/
+qa-evidence/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local environment and editor files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.local

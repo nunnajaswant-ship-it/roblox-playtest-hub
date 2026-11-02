@@ -1,0 +1,61 @@
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: #05070f;
+}
+
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#game-container {
+  position: fixed;
+  inset: 0;
+}
+
+#game-container canvas {
+  display: block;
+  touch-action: none;
+}
+
+#game-container canvas:focus-visible {
+  outline: 3px solid #38e8ff;
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.noscript {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: #e8f0ff;
+  background: #05070f;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #game-container canvas:focus-visible {
+    outline-offset: 0;
+  }
+}

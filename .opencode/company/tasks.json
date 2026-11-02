@@ -1,0 +1,74 @@
+{
+  "mission": "pixel-rush-toolchain",
+  "updated": "2026-11-02",
+  "tasks": [
+    {
+      "id": "T1",
+      "owner": "athena",
+      "title": "Global MCP + plugin config",
+      "depends_on": [],
+      "files": ["C:/Users/nunna/.config/opencode/opencode.jsonc"],
+      "acceptance": "opencode mcp list reports context7/playwright/chrome-devtools; superpowers plugin resolves",
+      "status": "done",
+      "evidence": "all three connected; 16 superpowers skills registered; Context7 and chrome-devtools exercised with live calls"
+    },
+    {
+      "id": "T2",
+      "owner": "pixel",
+      "title": "Phaser 4.2.1 + Vite 8 concept-agnostic scaffold",
+      "depends_on": [],
+      "files": ["package.json", "vite.config.js", "index.html", ".gitignore", "README.md", "netlify.toml", "src/**", "public/**"],
+      "acceptance": "npm run build exits 0; dist/index.html exists; dev server renders canvas without console errors",
+      "status": "done",
+      "evidence": "build exit 0; browser-verified Menu->Game->Pause->GameOver->restart; 0 console errors on dev and on dist preview"
+    },
+    {
+      "id": "T3",
+      "owner": "solon",
+      "title": "game-design + level-design skills",
+      "depends_on": [],
+      "files": [".opencode/skills/game-design/**", ".opencode/skills/level-design/**"],
+      "acceptance": "Both SKILL.md files have valid frontmatter and enforceable pass/fail rules",
+      "status": "done"
+    },
+    {
+      "id": "T4",
+      "owner": "ariadne",
+      "title": "game-juice + demo-script skills",
+      "depends_on": [],
+      "files": [".opencode/skills/game-juice/**", ".opencode/skills/demo-script/**"],
+      "acceptance": "Both SKILL.md files have valid frontmatter and concrete checklists",
+      "status": "done"
+    },
+    {
+      "id": "T5",
+      "owner": "argus",
+      "title": "playtest-review + ship-checklist skills",
+      "depends_on": [],
+      "files": [".opencode/skills/playtest-review/**", ".opencode/skills/ship-checklist/**"],
+      "acceptance": "Both SKILL.md files name exact MCP tools and a pass/fail gate",
+      "status": "done",
+      "note": "evidence-path guidance corrected by athena after live verification"
+    },
+    {
+      "id": "T6",
+      "owner": "athena",
+      "title": "Fix Vite watcher reload during browser QA",
+      "depends_on": ["T2"],
+      "files": ["vite.config.js", ".gitignore"],
+      "acceptance": "Screenshot writes no longer reload the page mid-playtest",
+      "status": "done",
+      "evidence": "qaTag marker survived full run; all scene transitions correct"
+    },
+    {
+      "id": "T7",
+      "owner": "client",
+      "title": "Publish deploy URL",
+      "depends_on": ["T2"],
+      "files": ["netlify.toml"],
+      "acceptance": "Live URL passes ship-checklist LIVE-01..03 in a cache-disabled private window",
+      "status": "blocked",
+      "blocker": "needs owner account and explicit approval to publish"
+    }
+  ]
+}
