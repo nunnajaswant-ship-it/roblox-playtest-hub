@@ -54,3 +54,17 @@
 ## Open
 - Deploy URL not published: needs owner account + explicit approval.
 - Game concept not chosen: design-contract is an unfilled template by design.
+
+## Wave 6 - Shared repo (athena)
+- Repo: https://github.com/nunnajaswant-ship-it/pixelrush_survey_corps (public, default branch main)
+- Concept fixed from repo name: Pixel Rush - Survey Corps. Hook traversal, 5 beacons, collapse wall.
+- Pushed 50 files on main (f30dab2, then e4196e0 for the PR template).
+- Branches created and pushed: abhiram/levels, abhitej/feel.
+- Team contract: team/abhiram (levels data), team/abhitej (audio + fx). Neither edits src/.
+- npm run check:team validates both modules. It caught 2 real bounds errors in the seed level on first run.
+- Clean-clone proof: fresh clone -> npm install 0, check:team PASS, npm run build 0, dist/index.html present.
+- Still on the placeholder mechanic. The hook core is the next build wave.
+
+## Open
+- Repo is public. Confirm that is intended.
+- Concept was inferred from the repo name. Confirm or overrule before the hook core is built.
