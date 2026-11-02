@@ -88,3 +88,21 @@ wins for progress and this file wins for intent.
 - Board is comfortable to about 300 cards, then it needs windowing.
 - No auth. The actor is a constant in src/config.ts.
 - Import replaces the whole database; there is no merge.
+
+## Scale-up: the pipeline (2026-11-02)
+
+- Added a playable test build with two variants: 0.5.0 (three planted defects) and
+  0.5.1 (fixed). The old build stays playable, which is the version-safety story.
+- Added the pipeline: deterministic score, suggested severity, confidence,
+  route, eight stages, downloadable work order, branch fix/PH-<ref>.
+- Added five agent prompts in pipeline/agents/ registered in opencode.jsonc:
+  reproducer, severity, fixer, selftest, reviewer. Leaves only. Never main.
+- Rule: a fix lives on a branch and only a human Verified mark unlocks merge.
+- Verified in browser: 7 nav views, canvas game ticks, pipeline scores 92 and
+  routes correctly, 0 console errors.
+
+## Deliberate scope for a 20 minute build
+
+- Pipeline stages 3-4 are rules, not a model call. Fast, offline, explainable.
+- The agent team runs from the CLI; it is not orchestrated by a server.
+- The test build's defects are planted, not emergent, so the demo is repeatable.

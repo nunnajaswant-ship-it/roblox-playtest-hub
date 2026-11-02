@@ -24,7 +24,7 @@ export type Frequency = 'always' | 'often' | 'sometimes' | 'once';
 
 export type HistoryKind = 'created' | 'status' | 'assignee' | 'comment' | 'duplicate';
 
-export type ViewId = 'overview' | 'triage' | 'reports' | 'readiness' | 'data';
+export type ViewId = 'overview' | 'playtest' | 'triage' | 'reports' | 'pipeline' | 'readiness' | 'data';
 
 export interface Build {
   id: string;

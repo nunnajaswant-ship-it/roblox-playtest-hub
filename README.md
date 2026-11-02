@@ -19,6 +19,24 @@ npm run build      # typecheck, then static build into dist/
 npm run preview    # serve dist/ on http://127.0.0.1:4173
 ```
 
+## The full loop
+
+```
+play Test build  ->  find a defect  ->  file a report  ->  pipeline scores and routes
+   ->  work order on branch fix/PH-<ref>  ->  agent team repairs  ->  self-test
+   ->  a human marks Verified  ->  only then is a merge allowed
+```
+
+- **Test build** plays a real canvas game. Build `0.5.0` ships with three planted
+  defects. Build `0.5.1` is the same scene after the fixes. The old build always
+  stays playable.
+- **Pipeline** shows the score, the suggested severity, the confidence, the
+  reasoning, the route, and a downloadable work order. It is deterministic: no
+  model call, no network, reproducible in front of a judge.
+- **Agent team** lives in `pipeline/agents/` as five prompts (reproducer, severity,
+  fixer, selftest, reviewer), registered in `opencode.jsonc`. They work on
+  `fix/PH-<ref>` and never touch `main`.
+
 The first load seeds three builds, three people, and eight reports so the board is
 never empty. Everything persists in `localStorage`. Export from the Data tab.
 

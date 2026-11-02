@@ -4,8 +4,10 @@ import { useApp, useDispatch } from '../state/context';
 
 const ITEMS: { id: ViewId; label: string; icon: string }[] = [
   { id: 'overview', label: 'Overview', icon: '\u25A6' },
+  { id: 'playtest', label: 'Test build', icon: '\u25B6' },
   { id: 'triage', label: 'Triage', icon: '\u25A4' },
   { id: 'reports', label: 'Reports', icon: '\u2261' },
+  { id: 'pipeline', label: 'Pipeline', icon: '\u2933' },
   { id: 'readiness', label: 'Readiness', icon: '\u25D4' },
   { id: 'data', label: 'Data', icon: '\u2699' }
 ];

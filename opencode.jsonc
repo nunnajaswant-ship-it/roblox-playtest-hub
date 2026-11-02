@@ -1,0 +1,38 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agents": {
+    "reproducer": {
+      "description": "Turns a filed bug report into the shortest exact reproduction. Read-only.",
+      "mode": "subagent",
+      "system": "{file:./pipeline/agents/reproducer.md}",
+      "permissions": [{ "action": "edit", "resource": "*", "effect": "deny" }]
+    },
+    "severity": {
+      "description": "Second opinion on the pipeline's severity score and route. Read-only.",
+      "mode": "subagent",
+      "system": "{file:./pipeline/agents/severity.md}",
+      "permissions": [{ "action": "edit", "resource": "*", "effect": "deny" }]
+    },
+    "fixer": {
+      "description": "Smallest correct patch on branch fix/PH-<ref>. Never touches main.",
+      "mode": "subagent",
+      "system": "{file:./pipeline/agents/fixer.md}",
+      "permissions": [
+        { "action": "shell", "resource": "git push*", "effect": "deny" },
+        { "action": "shell", "resource": "git checkout main*", "effect": "ask" }
+      ]
+    },
+    "selftest": {
+      "description": "Adversarially verifies a fix and looks for regressions. Read-only.",
+      "mode": "subagent",
+      "system": "{file:./pipeline/agents/selftest.md}",
+      "permissions": [{ "action": "edit", "resource": "*", "effect": "deny" }]
+    },
+    "reviewer": {
+      "description": "Merge gate. Blocks unless a human has marked the report Verified. Read-only.",
+      "mode": "subagent",
+      "system": "{file:./pipeline/agents/reviewer.md}",
+      "permissions": [{ "action": "edit", "resource": "*", "effect": "deny" }]
+    }
+  }
+}

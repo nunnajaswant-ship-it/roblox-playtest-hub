@@ -7,8 +7,10 @@ import { Toast } from './components/Toast';
 import { ReportForm } from './components/ReportForm';
 import { ReportDrawer } from './components/ReportDrawer';
 import { OverviewView } from './views/OverviewView';
+import { PlaytestView } from './views/PlaytestView';
 import { TriageView } from './views/TriageView';
 import { ReportsView } from './views/ReportsView';
+import { PipelineView } from './views/PipelineView';
 import { ReadinessView } from './views/ReadinessView';
 import { DataView } from './views/DataView';
 
@@ -55,8 +57,10 @@ function Workspace() {
       <Nav />
       <main className="main" id="main">
         {view === 'overview' ? <OverviewView /> : null}
+        {view === 'playtest' ? <PlaytestView /> : null}
         {view === 'triage' ? <TriageView /> : null}
         {view === 'reports' ? <ReportsView /> : null}
+        {view === 'pipeline' ? <PipelineView /> : null}
         {view === 'readiness' ? <ReadinessView /> : null}
         {view === 'data' ? <DataView /> : null}
       </main>
